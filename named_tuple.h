@@ -8,8 +8,6 @@
 #ifndef NAMED_TUPLE_H
 #define NAMED_TUPLE_H
 
-//  https://stackoverflow.com/questions/6245735/pretty-print-stdtuple, by AndyG and others
-
 
 #include <iostream>
 #include <tuple>
@@ -37,6 +35,8 @@ static inline std::ostream &operator<<(std::ostream &os, const std::tuple<T...> 
 }
 
 // -----------------------------------------
+
+//namespace named_tuple {
 
 template<typename VT, typename NT>
 struct NamedValue {
@@ -80,29 +80,27 @@ public:
     template <typename>
     constexpr static int named_type_find(int)
     {
-        return -5;
+        return -1;
     }
 
     template <typename T, typename Head, typename... Tail>
     constexpr static int named_type_find(int current_index = 0)
     {
-        return std::is_same<T, typename Head::namedtype>::value /* && current_index <= sizeof...(Tail) */
+        return std::is_same<T, typename Head::namedtype>::value
                ? current_index
                : named_type_find<T, Tail...>(current_index + 1);
     }
 
     template <typename T>
-    constexpr static int get_index()
+    constexpr static int get_index() 
     {
-        //static_assert(count<T, Types...>() == 1, "T must appear exactly once in ...Types");
         return named_type_find<T, TS...>();
     }
 
     template <typename T>
     auto& get()
     {
-        //        return std::get<named_type_find<T, TS...>()>(*this);
-        return std::get< (NamedTuple<TS...>::get_index<T>()) > (*this);
+        return std::get<(get_index<T>())> (*this);
     }
 
     template <typename T>
@@ -112,18 +110,28 @@ public:
 
 };
 
+template<class CharT, CharT... CS>
+inline constexpr auto operator "" _ ()
+{
+    return NamedType< CS ... > {};
+}
+
+#if 0 // to be implemented
+// Return a std::tuple with values without named_types information
+template<typename ... Ts>
+inline auto simple_tuple(std::tuple<NamedValue<Ts...>>& t) {
+    return std::tuple<Ts...>  (std::get<0>(t));
+}
+#endif
+
+//} // namespace named_tuple
+
+
 template<typename VT, typename NT>
 inline std::ostream& operator<<(std::ostream& os, const NamedValue<VT, NT>& nv) {
     os << nv._typename << ": " << nv._data;
     return os;
 }
-
-template<class CharT, CharT... cs>
-inline constexpr auto operator "" _ ()
-{
-    return NamedType< cs ... > {};
-}
-
 
 template<char ... C>
 std::ostream& operator << (std::ostream& os, const NamedType<C...>& nt) {
@@ -131,10 +139,5 @@ std::ostream& operator << (std::ostream& os, const NamedType<C...>& nt) {
     return os;
 }
 
-// Return a std::tuple with values
-template<typename ... Ts>
-inline auto simple_tuple(std::tuple<NamedValue<Ts...>>& t) {
-    return std::tuple<Ts...>  (std::get<0>(t));
-}
 
 #endif //NAMED_TUPLE_H

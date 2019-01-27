@@ -1,30 +1,32 @@
 
-// Some of the code is based on:
-//  https://stackoverflow.com/questions/6245735/pretty-print-stdtuple, by AndyG and others
-// http://blogs.microsoft.co.il/sasha/2015/01/28/implementing-tuple-part-4/
+// See README.md for more details about named_tuple.
+
+// Author: Erez Strauss <erez@erezstrauss.com>
 
 #include <named_tuple.h>
 #include <iostream>
 
+//using namespace named_tuple;  // To be implemented.
+
 template<typename ... TS>
 class Data : public std::tuple<std::decay_t<TS>...> {
 public:
-    Data(TS&& ... ts) noexcept : std::tuple<std::decay_t<TS>...>(std::forward<TS>(ts)...) {}
-
+    Data(TS&& ... ts) noexcept
+      : std::tuple<std::decay_t<TS>...>(std::forward<TS>(ts)...) {}
 };
 
 void example_1()
 {
     auto t1 = std::make_tuple(("fieldA"_ = 123), ("B"_ = 100.111), ("lastone"_ = 999));
-    std::cout << "example 1: " << t1 << '\n';
+    std::cout << "example 1:\n  " << t1 << '\n';
 }
 
 void example_2()
 {
     auto t2 = NamedTuple {("fieldA"_ = 123), ("B"_ = 100.111), ("lastone"_ = 999) };
-    std::cout << "example 2: " << t2 << '\n';
+    std::cout << "example 2:\n  " << t2 << '\n';
     t2["fieldA"_] = 321;
-    std::cout << "example 2, changed fieldA: " << t2 << '\n';
+    std::cout << "  changed fieldA: " << t2 << '\n';
 }
 
 
