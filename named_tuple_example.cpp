@@ -8,19 +8,14 @@
 
 //using namespace named_tuple;  // To be implemented.
 
-template<typename ... TS>
-class Data : public std::tuple<std::decay_t<TS>...> {
-public:
-    Data(TS&& ... ts) noexcept
-      : std::tuple<std::decay_t<TS>...>(std::forward<TS>(ts)...) {}
-};
-
+// Example 1 shows named tuple creation and printing
 void example_1()
 {
     auto t1 = std::make_tuple(("fieldA"_ = 123), ("B"_ = 100.111), ("lastone"_ = 999));
     std::cout << "example 1:\n  " << t1 << '\n';
 }
 
+// Example 2 shows named_tuple and field modification using operator[]
 void example_2()
 {
     auto t2 = NamedTuple {("fieldA"_ = 123), ("B"_ = 100.111), ("lastone"_ = 999) };
@@ -30,19 +25,42 @@ void example_2()
 }
 
 
+template<typename ... TS>
+class Data : public std::tuple<std::decay_t<TS>...> {
+public:
+  Data(TS&& ... ts) noexcept
+    : std::tuple<std::decay_t<TS>...>(std::forward<TS>(ts)...) {}
+};
+
+// Example 3 - shows simple tuple printing.
+void example_3()
+{
+  Data<std::string,double> simple_tuple ( "hello", 555 );
+
+  std::cout << "example 3:\n  Data: " << simple_tuple << '\n';
+
+}
+
+// Example 4 - shows Named types and Named values
+void example_4()
+{
+    auto abc = "abc"_;
+    std::cout << "example 4:\n  abc: " << abc << '\n';
+    auto nv = NamedValue<int, decltype("xyz"_)> { 42 };
+    std::cout << "   " << nv << '\n';
+}
+
 int main()
 {
 
     example_1();
     example_2();
-
-    Data<std::string,double> x ( "hello", 555 );
-
+    example_3();
+    example_4();
 
     auto z1 = "abc"_;
     std::cout << "deep tuple: " << std::make_tuple("Hello", 0.1, std::make_tuple(1,2,3,"four",5.5), 'Z') << std::endl;
-    std::cout << "Data: " << x << " z1: " << z1 << '\n';
-
+  
     auto t1 = std::make_tuple(("ax"_ = 5), ("by"_ = 3.4), ("str1"_=std::string("hello world")), ("str2"_="blabla2"));
     std::cout << "named tuple: " << t1 << '\n';
     auto deep1 = std::make_tuple(("a1"_=33), "deeptuple"_ = t1);
