@@ -12,8 +12,8 @@ With named tuples one can do much better, for example, create named fields pair:
 
  and the caller of this function will get a tuple with pointer and size, with their names
  access to fields is using [] operator:  for example:
- p = t["arrd"_];
- or setting using t["addr"_] = p;
+ p = t["adrr"__];
+ or setting using t["addr"__] = p;
  the operator [] is compile time functions, without any runtime overhead.
  the type names are all external to the data, so now data overhead enccured by using this header.
 
@@ -29,13 +29,14 @@ With named tuples one can do much better, for example, create named fields pair:
  2. no additional data in side the tuple - same memory layout for named_tuple<> and std::tuple<>
  3. access tuple members using [] operator that does not add overhead, see example#2
  4. the named tuple enable printing of the fields with their names
- 
+ 5. no MACROS, implement everything as C++ 17 and beyond. 
 
 # next tasks:
 
 1. namespace - for named tuples
 2. do two different namespaces for the ""_ and ""_t   literals
-3. 
+3. rename NamedTuple to named_tuple
+4. copy tuples by field types.
 
 # external refrences:
 In order to complete this header and examples file, I read the following refrences:
