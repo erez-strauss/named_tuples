@@ -97,6 +97,11 @@ public:
         static_assert(named_type_count<T, TS...>() == 1, "named type field, appears more than once in named tuple");
     }
 
+  // do we want a default constructor without initialization values?
+    named_tuple() noexcept : std::tuple<TS...>() {
+      (...,verify_named_type_count<typename TS::namedtype>());
+    }
+
     named_tuple(TS&& ... ts) noexcept : std::tuple<TS...>(std::forward<TS>(ts)...) {
       (...,verify_named_type_count<typename TS::namedtype>());
     }

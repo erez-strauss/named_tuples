@@ -56,13 +56,36 @@ void example_4()
 // Example 5 - if two fields have the same name - static asset will avoid, try to change fieldB to fieldA
 void example_5()
 {
+  // auto t5 = named_tuple {("fieldA"_ = 123), ("B"_ = 100.111), ("fieldA"_ = 4.5) }; - fails at compile time, as it detect two fields with same named-type.
   auto t5 = named_tuple {("fieldA"_ = 123), ("B"_ = 100.111), ("fieldB"_ = 4.5) };
   std::cout << "example 5:\n  " << t5 << '\n';
-  //t5["fieldA"_] = 321;
-  std::cout << "  changed fieldA: " << t5 << '\n';
 }
 
 
+template<>
+inline std::ostream& operator<< (std::ostream& os, const named_value<std::string, decltype("address"_)>& nv) {
+  os << nv._typename << ": '" << nv._data << "'";
+    return os;
+}
+
+// Example 6 shows defining a named tuple type Person, and using overrided operator << for specific field name.
+
+void example_6()
+{
+  
+  using Person = named_tuple<
+    named_value<unsigned, decltype("id"_)>
+    , named_value<float, decltype("age"_)>
+    , named_value<std::string, decltype("name"_)>
+    , named_value<std::string, decltype("address"_)>
+    >;
+  Person per;
+  per["id"_] = 111;
+  per["age"_] = 16.5;
+  per["name"_] = "Bob";
+  per["address"_] = "101 Main St. Big City";
+  std::cout << "example 6:\n  " << per << '\n';
+}
 
 int main()
 {
@@ -71,6 +94,8 @@ int main()
     example_2();
     example_3();
     example_4();
+    example_5();
+    example_6();
 
     auto z1 = "abc"_;
     std::cout << "deep tuple: " << std::make_tuple("Hello", 0.1, std::make_tuple(1,2,3,"four",5.5), 'Z') << std::endl;
