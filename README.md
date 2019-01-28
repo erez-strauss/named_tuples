@@ -12,8 +12,8 @@ With named tuples one can do much better, for example, create named fields pair:
 
  and the caller of this function will get a tuple with pointer and size, with their names
  access to fields is using [] operator:  for example:
- p = t["adrr"__];
- or setting using t["addr"__] = p;
+ p = t[ "adrr"\_];
+ or setting using t["addr"\_] = p;
  the operator [] is compile time functions, without any runtime overhead.
  the type names are all external to the data, so now data overhead enccured by using this header.
 
