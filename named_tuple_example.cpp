@@ -6,7 +6,7 @@
 #include <named_tuple.h>
 #include <iostream>
 
-//using namespace named_tuple;  // To be implemented.
+//using namespace named;  // To be implemented.
 
 // Example 1 shows named tuple creation and printing
 void example_1()
@@ -18,7 +18,7 @@ void example_1()
 // Example 2 shows named_tuple and field modification using operator[]
 void example_2()
 {
-    auto t2 = NamedTuple {("fieldA"_ = 123), ("B"_ = 100.111), ("lastone"_ = 999) };
+    auto t2 = named_tuple {("fieldA"_ = 123), ("B"_ = 100.111), ("lastone"_ = 999) };
     std::cout << "example 2:\n  " << t2 << '\n';
     t2["fieldA"_] = 321;
     std::cout << "  changed fieldA: " << t2 << '\n';
@@ -46,9 +46,20 @@ void example_4()
 {
     auto abc = "abc"_;
     std::cout << "example 4:\n  abc: " << abc << '\n';
-    auto nv = NamedValue<int, decltype("xyz"_)> { 42 };
+    auto nv = named_value<int, decltype("xyz"_)> { 42 };
     std::cout << "   " << nv << '\n';
 }
+
+// Example 5 - if two fields have the same name - static asset will avoid, try to change fieldB to fieldA
+void example_5()
+{
+  auto t5 = named_tuple {("fieldA"_ = 123), ("B"_ = 100.111), ("fieldB"_ = 4.5) };
+  std::cout << "example 5:\n  " << t5 << '\n';
+  //t5["fieldA"_] = 321;
+  std::cout << "  changed fieldA: " << t5 << '\n';
+}
+
+
 
 int main()
 {
@@ -75,19 +86,16 @@ int main()
 
     auto onevalue = std::make_tuple(("field1"_ = 2.1)) ;
     std::cout << "one value named tuple: " << onevalue << '\n';
-    auto nt1 = NamedTuple { ("fieldX"_ = 123), ("fieldY"_ = "test me") };
-    //auto nt1 = NamedTuple { ("fieldX"_ = 123) };
+    auto nt1 = named_tuple { ("fieldX"_ = 123), ("fieldY"_ = "test me") };
 
-    //std::cout << simple_tuple(onevalue) << '\n';
     std::cout << "named tuple: " << nt1 << '\n';
-    // std::cout << "nt1.find_field_index : " << nt1.named_type_find< NamedValue<int, decltype("fieldX"_)>, NamedValue<int, decltype("fieldX"_)> > () << '\n';
-    std::cout << "nt1.find_field_index : " << nt1.named_type_find< decltype("fieldX"_), NamedValue<int, decltype("fieldX"_)> > () << '\n';
 
     std::cout << "n1.get_index<>(): " << nt1.get_index< decltype("fieldX"_) >() << '\n';
 
-    std::cout << (nt1.get<decltype("fieldX"_)>() ) << '\n';
     std::cout << nt1["fieldX"_] << '\n';
     std::cout << nt1["fieldY"_] << '\n';
 
+    auto ttree = named_tuple { ("f1"_ = 123), ("subtup"_ = named_tuple { ("s1"_ = 345), ("s2"_=564) }), ("f3"_ ="test me") };
+    std::cout << "tree: " << ttree << '\n';
     return 0;
 }

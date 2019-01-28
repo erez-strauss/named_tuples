@@ -38,8 +38,10 @@ static inline std::ostream &operator<<(std::ostream &os, const std::tuple<T...> 
 
 //namespace named_tuple {
 
+// named_value - value type VT, name type NT - holds the value type in a tuple while knowing the named type as type property
+
 template<typename VT, typename NT>
-struct NamedValue {
+struct named_value {
     static inline const char* _typename { NT::_name };
     using type = VT;
     using namedtype = typename NT::type;
@@ -51,29 +53,52 @@ struct NamedValue {
     VT& operator=(VT&& value) { _data = std::move(value); return _data; }
 };
 
+// named type - creates a type for a given string, field a tuple member.
+
 template<char ... C>
-struct NamedType {
+struct named_type {
     static const inline char _name[sizeof...(C)+1] { C ..., '\0' };
-    using type = NamedType;
+    using type = named_type;
 
     template<size_t N>
     auto operator=(const char (& s)[N]) {
-        return NamedValue<std::string, NamedType> { s };
+        return named_value<std::string, named_type> { s };
     }
 
     template<typename T>
-    auto operator=(const T& v) { return NamedValue<T, NamedType> { v } ; }
+    auto operator=(const T& v) { return named_value<T, named_type> { v } ; }
 
 };
 
+// named tuple - hold named values, inherits from std::tuple
+//  TS the named value types
+
 template<typename ... TS>
-class NamedTuple : public std::tuple<TS...> {
+class named_tuple : public std::tuple<TS...> {
 public:
-    using type = NamedTuple<TS...>;
+    using type = named_tuple<TS...>;
     using simple_tuple_t = typename std::tuple<typename TS::type ...>;
 
-    NamedTuple(TS&& ... ts) noexcept : std::tuple<TS...>(std::forward<TS>(ts)...) {
-        //static_assert(count<T, Types...>() == 1, "T must appear exactly once in ...Types");
+    template <typename>
+    constexpr static int named_type_count(int)
+    {
+        return 0;
+    }
+
+    template <typename T, typename Head, typename... Tail>
+    constexpr static int named_type_count(int current_index = 0)
+    {
+      return (std::is_same<T, typename Head::namedtype>::value ? 1 : 0)
+	+ named_type_count<T, Tail...>(current_index + 1);
+    }
+  
+    template <typename T>
+    constexpr static void verify_named_type_count() {
+        static_assert(named_type_count<T, TS...>() == 1, "named type field, appears more than once in named tuple");
+    }
+
+    named_tuple(TS&& ... ts) noexcept : std::tuple<TS...>(std::forward<TS>(ts)...) {
+      (...,verify_named_type_count<typename TS::namedtype>());
     }
 
 
@@ -90,10 +115,11 @@ public:
                ? current_index
                : named_type_find<T, Tail...>(current_index + 1);
     }
-
+  
     template <typename T>
     constexpr static int get_index() 
     {
+      static_assert(named_type_count<T, TS...>() == 1, "named type must can appear only once in ...named tuple");
         return named_type_find<T, TS...>();
     }
 
@@ -113,28 +139,28 @@ public:
 template<class CharT, CharT... CS>
 inline constexpr auto operator "" _ ()
 {
-    return NamedType< CS ... > {};
+    return named_type< CS ... > {};
 }
 
 #if 0 // to be implemented
 // Return a std::tuple with values without named_types information
 template<typename ... Ts>
-inline auto simple_tuple(std::tuple<NamedValue<Ts...>>& t) {
+inline auto simple_tuple(std::tuple<named_value<Ts...>>& t) {
     return std::tuple<Ts...>  (std::get<0>(t));
 }
 #endif
 
-//} // namespace named_tuple
+//} // namespace named
 
 
 template<typename VT, typename NT>
-inline std::ostream& operator<<(std::ostream& os, const NamedValue<VT, NT>& nv) {
+inline std::ostream& operator<<(std::ostream& os, const named_value<VT, NT>& nv) {
     os << nv._typename << ": " << nv._data;
     return os;
 }
 
 template<char ... C>
-std::ostream& operator << (std::ostream& os, const NamedType<C...>& nt) {
+std::ostream& operator << (std::ostream& os, const named_type<C...>& nt) {
     os << "Namedtype: " << nt._name ;
     return os;
 }
