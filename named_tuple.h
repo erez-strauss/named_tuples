@@ -134,6 +134,10 @@ public:
         return get<decltype(t)>();
     }
 
+  template<typename F>
+  void foreach(F& f) {
+    (...,f(get<typename TS::namedtype>()));
+  }
 };
 
 template<class CharT, CharT... CS>

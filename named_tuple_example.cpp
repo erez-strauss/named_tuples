@@ -22,6 +22,9 @@ void example_2()
     std::cout << "example 2:\n  " << t2 << '\n';
     t2["fieldA"_] = 321;
     std::cout << "  changed fieldA: " << t2 << '\n';
+
+    auto pfoo = [](auto x) { std::cout << "    name: '" << x._typename << "' value: " << x._data << '\n'; };
+    t2.foreach( pfoo );
 }
 
 
