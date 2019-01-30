@@ -46,11 +46,24 @@ struct named_value {
     using type = VT;
     using namedtype = typename NT::type;
 
-    VT _data;
+  named_value(const VT& v) : _data (v) {}
+  named_value(VT&& v) : _data (std::move(v)) {}
+  named_value() = default;
+  named_value(const named_value&) = default;
+  named_value(named_value&&) = default;
+  named_value& operator=(const named_value&) = default;
+  named_value& operator=(named_value&&) = default;
+
+  template<typename ... Args> explicit named_value(Args ... args) : _data (std::forward<Args...>(args)...) {}
+  
     operator VT&() { return _data; }
+    VT& get() { return _data; }
+    const VT& get() const { return _data; }
 
     VT& operator=(const VT& value) { _data = value; return _data; }
     VT& operator=(VT&& value) { _data = std::move(value); return _data; }
+private:
+  VT _data;
 };
 
 // named type - creates a type for a given string, field a tuple member.
@@ -66,7 +79,10 @@ struct named_type {
     }
 
     template<typename T>
-    auto operator=(const T& v) { return named_value<T, named_type> { v } ; }
+    auto operator=(const T& v) const { return named_value<T, named_type> ( v ) ; }
+
+    template<typename T>
+    auto operator=(T& v) const { return named_value<T, named_type> ( std::move(v) ) ; }
 
 };
 
@@ -76,6 +92,7 @@ struct named_type {
 template<typename ... TS>
 class named_tuple : public std::tuple<TS...> {
 public:
+
     using type = named_tuple<TS...>;
     using simple_tuple_t = typename std::tuple<typename TS::type ...>;
 
@@ -97,7 +114,6 @@ public:
         static_assert(named_type_count<T, TS...>() == 1, "named type field, appears more than once in named tuple");
     }
 
-  // do we want a default constructor without initialization values?
     named_tuple() noexcept : std::tuple<TS...>() {
       (...,verify_named_type_count<typename TS::namedtype>());
     }
@@ -105,7 +121,6 @@ public:
     named_tuple(TS&& ... ts) noexcept : std::tuple<TS...>(std::forward<TS>(ts)...) {
       (...,verify_named_type_count<typename TS::namedtype>());
     }
-
 
     template <typename>
     constexpr static int named_type_find(int)
@@ -124,7 +139,7 @@ public:
     template <typename T>
     constexpr static int get_index() 
     {
-      static_assert(named_type_count<T, TS...>() == 1, "named type must can appear only once in ...named tuple");
+      static_assert(named_type_count<T, TS...>() == 1, "named type can appear only once in a named tuple");
         return named_type_find<T, TS...>();
     }
 
@@ -143,6 +158,12 @@ public:
   void foreach(F& f) {
     (...,f(get<typename TS::namedtype>()));
   }
+
+  // Return the std::tuple with values without named_types information
+  inline std::tuple<typename TS::type ... >& simple_tuple() {
+    return reinterpret_cast< std::tuple< typename TS::type ... >& >  (*this);
+  }
+
 };
 
 template<class CharT, CharT... CS>
@@ -151,20 +172,12 @@ inline constexpr auto operator "" _ ()
     return named_type< CS ... > {};
 }
 
-#if 0 // to be implemented
-// Return a std::tuple with values without named_types information
-template<typename ... Ts>
-inline auto simple_tuple(std::tuple<named_value<Ts...>>& t) {
-    return std::tuple<Ts...>  (std::get<0>(t));
-}
-#endif
-
 //} // namespace named
 
 
 template<typename VT, typename NT>
 inline std::ostream& operator<<(std::ostream& os, const named_value<VT, NT>& nv) {
-    os << nv._typename << ": " << nv._data;
+  os << nv._typename << ": " << nv.get();
     return os;
 }
 

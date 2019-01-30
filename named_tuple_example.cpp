@@ -23,7 +23,7 @@ void example_2()
     t2["fieldA"_] = 321;
     std::cout << "  changed fieldA: " << t2 << '\n';
 
-    auto pfoo = [](auto x) { std::cout << "    name: '" << x._typename << "' value: " << x._data << '\n'; };
+    auto pfoo = [](auto x) { std::cout << "    name: '" << x._typename << "' value: " << x.get() << '\n'; };
     t2.foreach( pfoo );
 }
 
@@ -64,7 +64,7 @@ void example_5()
 
 template<>
 inline std::ostream& operator<< (std::ostream& os, const named_value<std::string, decltype("address"_)>& nv) {
-  os << nv._typename << ": '" << nv._data << "'";
+  os << nv._typename << ": '" << nv.get() << "'";
     return os;
 }
 
@@ -85,6 +85,13 @@ void example_6()
   per["name"_] = "Bob";
   per["address"_] = "101 Main St. Big City";
   std::cout << "example 6:\n  " << per << '\n';
+
+  auto naked_tuple = per.simple_tuple();
+  std::cout << "  get<0>(naked_tuple)  " << std::get<0>(naked_tuple) << '\n';
+  std::cout << "  get<1>(naked_tuple)  " << std::get<1>(naked_tuple) << '\n';
+  std::cout << "  get<2>(naked_tuple)  " << std::get<2>(naked_tuple) << '\n';
+  std::cout << "  get<3>(naked_tuple)  " << std::get<3>(naked_tuple) << '\n';
+  static_assert ( sizeof(naked_tuple) == sizeof(per), "std::uple size != named_tuple size !");
 }
 
 int main()

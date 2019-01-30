@@ -3,7 +3,7 @@ C++ named tuple
 
 # motivation
 
-The need for simple on the fly creation of named tuple with out much of overhead and remove the magic behind the first and second fields of std::pair<> or the index of the members in std::tuple<>
+The need for simple on the fly creation of named tuple without much of overhead and remove the magic behind the first and second fields of std::pair<> or the index of the members in std::tuple<>
 
 With named tuples one can do much better, for example, create named fields pair:
 
