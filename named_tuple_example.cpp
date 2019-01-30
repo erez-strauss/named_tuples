@@ -94,6 +94,26 @@ void example_6()
   static_assert ( sizeof(naked_tuple) == sizeof(per), "std::uple size != named_tuple size !");
 }
 
+void example_7()
+{
+  
+  using Person = named_tuple<
+    named_value<unsigned, decltype("id"_)>
+    , named_value<float, decltype("age"_)>
+    , named_value<std::string, decltype("name"_)>
+    , named_value<std::string, decltype("address"_)>
+    >;
+  Person per;
+  per["id"_] = 111;
+  per["age"_] = 16.5;
+  per["name"_] = "Bob";
+  per["address"_] = "101 Main St. Big City";
+  std::cout << "example 7:\n   " << per << '\n';
+  auto update = named_tuple{("id"_ = 333), ("age"_=99.9)};
+  std::cout << "   " << (per << update) << '\n';
+
+}
+
 int main()
 {
 
@@ -103,6 +123,7 @@ int main()
     example_4();
     example_5();
     example_6();
+    example_7();
 
     auto z1 = "abc"_;
     std::cout << "deep tuple: " << std::make_tuple("Hello", 0.1, std::make_tuple(1,2,3,"four",5.5), 'Z') << std::endl;

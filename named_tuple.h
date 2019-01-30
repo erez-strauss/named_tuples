@@ -166,6 +166,11 @@ public:
 
 };
 
+template<typename ... TT, typename ... ST>
+auto operator << (named_tuple<TT...>&trg, named_tuple<ST...>&src) {
+  (...,(trg[typename ST::namedtype{}] = src[typename ST::namedtype{}]));
+  return trg;
+}
 template<class CharT, CharT... CS>
 inline constexpr auto operator "" _ ()
 {
