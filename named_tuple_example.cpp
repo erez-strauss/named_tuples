@@ -113,6 +113,7 @@ void example_7()
   std::cout << "   " << (per << update) << '\n';
 
 }
+
 void example_8()
 {
   
@@ -132,6 +133,23 @@ void example_8()
 
 }
 
+void example_9()
+{
+
+  auto t1 = named_tuple{("addr"_=(void*)example_9),("size"_=999), ("fldx"_=.333)};
+  auto t2 = named_tuple{("size"_=888), ("addr"_=(void*)example_8)};
+  std::cout << "example 8:"
+	    << "\n   t1: " << t1
+	    << "\n   t2: " << t2
+    ;
+  t1 << t2;  // t1 = t2 , but << is better as in mean update with fields from t2
+  std::cout 
+	    << "\n   t1: " << t1
+	    << "\n   t2: " << t2
+	    << '\n';
+
+}
+
 int main()
 {
 
@@ -143,6 +161,7 @@ int main()
     example_6();
     example_7();
     example_8();
+    example_9();
 
     auto z1 = "abc"_;
     std::cout << "deep tuple: " << std::make_tuple("Hello", 0.1, std::make_tuple(1,2,3,"four",5.5), 'Z') << std::endl;
