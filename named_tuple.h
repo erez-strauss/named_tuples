@@ -155,11 +155,13 @@ public:
     }
 
   template<typename F>
-  void foreach(F& f) {
+  auto& foreach(F&& f) {
     (...,f(get<typename TS::namedtype>()));
+    return *this;
   }
 
   // Return the std::tuple with values without named_types information
+
   inline std::tuple<typename TS::type ... >& simple_tuple() {
     return reinterpret_cast< std::tuple< typename TS::type ... >& >  (*this);
   }
@@ -167,10 +169,17 @@ public:
 };
 
 template<typename ... TT, typename ... ST>
-auto operator << (named_tuple<TT...>&trg, named_tuple<ST...>&src) {
+auto& operator << (named_tuple<TT...>&trg, named_tuple<ST...>&src) {
   (...,(trg[typename ST::namedtype{}] = src[typename ST::namedtype{}]));
   return trg;
 }
+
+template<typename ... TT, typename ... NV>
+auto& operator << (named_tuple<TT...>&trg, const NV& ... src) {
+  (..., (trg[typename NV::namedtype{}] = src.get()));
+  return trg;
+}
+
 template<class CharT, CharT... CS>
 inline constexpr auto operator "" _ ()
 {

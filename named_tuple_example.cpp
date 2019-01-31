@@ -113,6 +113,24 @@ void example_7()
   std::cout << "   " << (per << update) << '\n';
 
 }
+void example_8()
+{
+  
+  using Person = named_tuple<
+    named_value<unsigned, decltype("id"_)>
+    , named_value<float, decltype("age"_)>
+    , named_value<std::string, decltype("name"_)>
+    , named_value<std::string, decltype("address"_)>
+    >;
+  Person per;
+  per["id"_] = 111;
+  per["age"_] = 16.5;
+  per["name"_] = "Bob";
+  per["address"_] = "101 Main St. Big City";
+  std::cout << "example 8:\n   " << per << '\n';
+  std::cout << "   " << (per << ("age"_ = 3) << ("id"_=1001)) << '\n';
+
+}
 
 int main()
 {
@@ -124,6 +142,7 @@ int main()
     example_5();
     example_6();
     example_7();
+    example_8();
 
     auto z1 = "abc"_;
     std::cout << "deep tuple: " << std::make_tuple("Hello", 0.1, std::make_tuple(1,2,3,"four",5.5), 'Z') << std::endl;
