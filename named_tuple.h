@@ -140,6 +140,11 @@ class named_tuple : public std::tuple<TS...> {
         (..., (get<typename CT::namedtype>() = ct[typename CT::namedtype{}]));
     }
 
+    template<typename... CT>
+    named_tuple(const CT&&... cvt) noexcept {
+        (..., (get<typename CT::namedtype>() = cvt.get()));
+    }
+
     template<typename>
     constexpr static int named_type_find(int) noexcept {
         return -1;

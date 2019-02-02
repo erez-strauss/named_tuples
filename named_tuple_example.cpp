@@ -145,6 +145,14 @@ void example_10() {
               << t1 << "\n   " << t2 << '\n';
 }
 
+void example_11() {
+    using MemRegion = named_tuple<named_value<void*, decltype("addr"_)>,
+                                  named_value<uint64_t, decltype("size"_)> >;
+
+    auto t1 = MemRegion{("size"_ = 100), ("addr"_ = (void*)example_11)};
+    std::cout << "example 11 constructor with compatible named_values:\n   "
+              << t1 << "\n";
+}
 int main() {
     example_1();
     example_2();
@@ -156,6 +164,7 @@ int main() {
     example_8();
     example_9();
     example_10();
+    example_11();
 
     auto z1 = "abc"_;
     std::cout << "deep tuple: "
