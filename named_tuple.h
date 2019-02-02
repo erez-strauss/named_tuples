@@ -122,14 +122,19 @@ public:
       (...,verify_named_type_count<typename TS::namedtype>());
     }
 
+    template<typename ... CT>
+    named_tuple(named_tuple<CT ...>& ct) noexcept {
+      (...,(get<typename CT::namedtype>()=ct[typename CT::namedtype{}]));
+    }
+
     template <typename>
-    constexpr static int named_type_find(int)
+    constexpr static int named_type_find(int) noexcept
     {
         return -1;
     }
 
     template <typename T, typename Head, typename... Tail>
-    constexpr static int named_type_find(int current_index = 0)
+    constexpr static int named_type_find(int current_index = 0) noexcept
     {
         return std::is_same<T, typename Head::namedtype>::value
                ? current_index
@@ -137,25 +142,25 @@ public:
     }
   
     template <typename T>
-    constexpr static int get_index() 
+    constexpr static int get_index() noexcept
     {
       static_assert(named_type_count<T, TS...>() == 1, "named type can appear only once in a named tuple");
         return named_type_find<T, TS...>();
     }
 
     template <typename T>
-    auto& get()
+    auto& get() noexcept
     {
         return std::get<(get_index<T>())> (*this);
     }
 
     template <typename T>
-    auto& operator[](T t) {
+    auto& operator[](T t) noexcept {
         return get<decltype(t)>();
     }
 
   template<typename F>
-  auto& foreach(F&& f) {
+  auto& foreach(F&& f) noexcept {
     (...,f(get<typename TS::namedtype>()));
     return *this;
   }

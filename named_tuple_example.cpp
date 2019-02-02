@@ -150,6 +150,18 @@ void example_9()
 
 }
 
+void example_10()
+{
+  auto t1 = named_tuple{("a"_=10),("b"_="nameA")};
+  using Data = named_tuple<
+    named_value<std::string, decltype("b"_)>
+    , named_value<int, decltype("a"_)>
+    >;
+
+  auto t2 = Data(t1);
+  std::cout << "example 10 constructor with compatible named_tuple:\n   " << t1 << "\n   " << t2 << '\n';
+}
+
 int main()
 {
 
@@ -162,6 +174,7 @@ int main()
     example_7();
     example_8();
     example_9();
+    example_10();
 
     auto z1 = "abc"_;
     std::cout << "deep tuple: " << std::make_tuple("Hello", 0.1, std::make_tuple(1,2,3,"four",5.5), 'Z') << std::endl;
