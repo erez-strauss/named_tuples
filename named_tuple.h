@@ -11,8 +11,6 @@
 #include <iostream>
 #include <tuple>
 
-namespace {
-
 template<class... T>
 static inline std::ostream& operator<<(std::ostream& os,
                                        const std::tuple<T...>& _tup);
@@ -31,10 +29,6 @@ static inline std::ostream& operator<<(std::ostream& os,
                                        const std::tuple<T...>& _tup) {
     return tuple_print(os, _tup, std::make_index_sequence<sizeof...(T)>());
 }
-
-}  // namespace
-
-// -----------------------------------------
 
 // namespace named_tuple {
 
