@@ -10,16 +10,18 @@
 #include <type_traits>
 
 template<typename... TS>
-class exception_tuple : public std::exception {
+class exception_tuple : public std::exception,
+                        public nvtuple_ns::named_tuple<std::decay_t<TS>...> {
    public:
-    std::tuple<std::decay_t<TS>...> _data;
     std::string mutable _str;
 
-    exception_tuple<TS...>(TS... vs) : _data(vs...) {}
+    exception_tuple<TS...>(const TS&... vs)
+        : nvtuple_ns::named_tuple<std::decay_t<TS>...>(
+              std::forward<const TS>(vs)...) {}
 
     virtual const char* what() const noexcept {
         std::stringstream buff{};
-        (..., (buff << ", " << std::get<TS>(_data)));
+        (..., (buff << ", " << std::get<TS>(*this)));
         _str = buff.str();
         return _str.c_str();
     }
@@ -29,4 +31,3 @@ class exception_tuple : public std::exception {
     exception_tuple(("file"_ = __FILE__), ("line"_ = __LINE__),    \
                     ("func"_ = __PRETTY_FUNCTION__) __VA_OPT__(, ) \
                         __VA_ARGS__)
-

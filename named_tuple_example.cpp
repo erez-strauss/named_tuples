@@ -6,7 +6,7 @@
 #include <named_tuple.h>
 #include <iostream>
 
-// using namespace named;  // To be implemented.
+namespace nvt = nvtuple_ns;
 
 // Example 1 shows named tuple creation and printing
 void example_1() {
@@ -17,8 +17,8 @@ void example_1() {
 
 // Example 2 shows named_tuple and field modification using operator[]
 void example_2() {
-    auto t2 =
-        named_tuple{("fieldA"_ = 123), ("B"_ = 100.111), ("lastone"_ = 999)};
+    auto t2 = nvt::named_tuple{("fieldA"_ = 123), ("B"_ = 100.111),
+                               ("lastone"_ = 999)};
     std::cout << "example 2:\n  " << t2 << '\n';
     t2["fieldA"_] = 321;
     std::cout << "  changed fieldA: " << t2 << '\n';
@@ -48,7 +48,7 @@ void example_3() {
 void example_4() {
     auto abc = "abc"_;
     std::cout << "example 4:\n  abc: " << abc << '\n';
-    auto nv = named_value<int, decltype("xyz"_)>{42};
+    auto nv = nvt::named_value<int, decltype("xyz"_)>{42};
     std::cout << "   " << nv << '\n';
 }
 
@@ -58,15 +58,15 @@ void example_5() {
     // auto t5 = named_tuple {("fieldA"_ = 123), ("B"_ = 100.111), ("fieldA"_
     // = 4.5) }; - fails at compile time, as it detect two fields with same
     // named-type.
-    auto t5 =
-        named_tuple{("fieldA"_ = 123), ("B"_ = 100.111), ("fieldB"_ = 4.5)};
+    auto t5 = nvt::named_tuple{("fieldA"_ = 123), ("B"_ = 100.111),
+                               ("fieldB"_ = 4.5)};
     std::cout << "example 5:\n  " << t5 << '\n';
 }
 
 template<>
 inline std::ostream& operator<<(
     std::ostream& os,
-    const named_value<std::string, decltype("address"_)>& nv) {
+    const nvt::named_value<std::string, decltype("address"_)>& nv) {
     os << nv._typename << ": '" << nv.get() << "'";
     return os;
 }
@@ -75,10 +75,11 @@ inline std::ostream& operator<<(
 // operator << for specific field name.
 
 void example_6() {
-    using Person = named_tuple<named_value<unsigned, decltype("id"_)>,
-                               named_value<float, decltype("age"_)>,
-                               named_value<std::string, decltype("name"_)>,
-                               named_value<std::string, decltype("address"_)> >;
+    using Person =
+        nvt::named_tuple<nvt::named_value<unsigned, decltype("id"_)>,
+                         nvt::named_value<float, decltype("age"_)>,
+                         nvt::named_value<std::string, decltype("name"_)>,
+                         nvt::named_value<std::string, decltype("address"_)> >;
     Person per;
     per["id"_] = 111;
     per["age"_] = 16.5;
@@ -96,25 +97,27 @@ void example_6() {
 }
 
 void example_7() {
-    using Person = named_tuple<named_value<unsigned, decltype("id"_)>,
-                               named_value<float, decltype("age"_)>,
-                               named_value<std::string, decltype("name"_)>,
-                               named_value<std::string, decltype("address"_)> >;
+    using Person =
+        nvt::named_tuple<nvt::named_value<unsigned, decltype("id"_)>,
+                         nvt::named_value<float, decltype("age"_)>,
+                         nvt::named_value<std::string, decltype("name"_)>,
+                         nvt::named_value<std::string, decltype("address"_)> >;
     Person per;
     per["id"_] = 111;
     per["age"_] = 16.5;
     per["name"_] = "Bob";
     per["address"_] = "101 Main St. Big City";
     std::cout << "example 7:\n   " << per << '\n';
-    auto update = named_tuple{("id"_ = 333), ("age"_ = 99.9)};
+    auto update = nvt::named_tuple{("id"_ = 333), ("age"_ = 99.9)};
     std::cout << "   " << (per << update) << '\n';
 }
 
 void example_8() {
-    using Person = named_tuple<named_value<unsigned, decltype("id"_)>,
-                               named_value<float, decltype("age"_)>,
-                               named_value<std::string, decltype("name"_)>,
-                               named_value<std::string, decltype("address"_)> >;
+    using Person =
+        nvt::named_tuple<nvt::named_value<unsigned, decltype("id"_)>,
+                         nvt::named_value<float, decltype("age"_)>,
+                         nvt::named_value<std::string, decltype("name"_)>,
+                         nvt::named_value<std::string, decltype("address"_)> >;
     Person per;
     per["id"_] = 111;
     per["age"_] = 16.5;
@@ -125,9 +128,9 @@ void example_8() {
 }
 
 void example_9() {
-    auto t1 = named_tuple{("addr"_ = (void*)example_9), ("size"_ = 999),
-                          ("fldx"_ = .333)};
-    auto t2 = named_tuple{("size"_ = 888), ("addr"_ = (void*)example_8)};
+    auto t1 = nvt::named_tuple{("addr"_ = (void*)example_9), ("size"_ = 999),
+                               ("fldx"_ = .333)};
+    auto t2 = nvt::named_tuple{("size"_ = 888), ("addr"_ = (void*)example_8)};
     std::cout << "example 8:"
               << "\n   t1: " << t1 << "\n   t2: " << t2;
     t1 << t2;  // t1 = t2 , but << is better as in mean update with fields from
@@ -136,9 +139,9 @@ void example_9() {
 }
 
 void example_10() {
-    auto t1 = named_tuple{("a"_ = 10), ("b"_ = "nameA")};
-    using Data = named_tuple<named_value<std::string, decltype("b"_)>,
-                             named_value<int, decltype("a"_)> >;
+    auto t1 = nvt::named_tuple{("a"_ = 10), ("b"_ = "nameA")};
+    using Data = nvt::named_tuple<nvt::named_value<std::string, decltype("b"_)>,
+                                  nvt::named_value<int, decltype("a"_)> >;
 
     auto t2 = Data(t1);
     std::cout << "example 10 constructor with compatible named_tuple:\n   "
@@ -146,13 +149,15 @@ void example_10() {
 }
 
 void example_11() {
-    using MemRegion = named_tuple<named_value<void*, decltype("addr"_)>,
-                                  named_value<uint64_t, decltype("size"_)> >;
+    using MemRegion =
+        nvt::named_tuple<nvt::named_value<void*, decltype("addr"_)>,
+                         nvt::named_value<uint64_t, decltype("size"_)> >;
 
     auto t1 = MemRegion{("size"_ = 100), ("addr"_ = (void*)example_11)};
     std::cout << "example 11 constructor with compatible named_values:\n   "
               << t1 << "\n";
 }
+
 int main() {
     example_1();
     example_2();
@@ -188,7 +193,7 @@ int main() {
 
     auto onevalue = std::make_tuple(("field1"_ = 2.1));
     std::cout << "one value named tuple: " << onevalue << '\n';
-    auto nt1 = named_tuple{("fieldX"_ = 123), ("fieldY"_ = "test me")};
+    auto nt1 = nvt::named_tuple{("fieldX"_ = 123), ("fieldY"_ = "test me")};
 
     std::cout << "named tuple: " << nt1 << '\n';
 
@@ -198,8 +203,9 @@ int main() {
     std::cout << nt1["fieldX"_] << '\n';
     std::cout << nt1["fieldY"_] << '\n';
 
-    auto ttree = named_tuple{
-        ("f1"_ = 123), ("subtup"_ = named_tuple{("s1"_ = 345), ("s2"_ = 564)}),
+    auto ttree = nvt::named_tuple{
+        ("f1"_ = 123),
+        ("subtup"_ = nvt::named_tuple{("s1"_ = 345), ("s2"_ = 564)}),
         ("f3"_ = "test me")};
     std::cout << "tree: " << ttree << '\n';
     return 0;

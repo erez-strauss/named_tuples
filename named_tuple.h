@@ -5,18 +5,13 @@
 
 #pragma once
 
-#ifndef NAMED_TUPLE_H
-#define NAMED_TUPLE_H
-
 #include <iostream>
 #include <tuple>
 
-template<class... T>
-static inline std::ostream& operator<<(std::ostream& os,
-                                       const std::tuple<T...>& _tup);
+namespace nvtuple_ns {  // named value tuple
 
-template<class TupType, size_t... I>
-static inline std::ostream& tuple_print(std::ostream& os, const TupType& _tup,
+template<class TT, size_t... I>
+static inline std::ostream& tuple_print(std::ostream& os, const TT& _tup,
                                         std::index_sequence<I...>) {
     os << "(";
     (..., (os << (I == 0 ? "" : ", ") << (std::get<I>(_tup))));
@@ -24,16 +19,23 @@ static inline std::ostream& tuple_print(std::ostream& os, const TupType& _tup,
     return os;
 }
 
+}  // namespace nvtuple_ns
+
+template<class... T>
+static inline std::ostream& operator<<(std::ostream& os,
+                                       const std::tuple<T...>& _tup);
+
 template<class... T>
 static inline std::ostream& operator<<(std::ostream& os,
                                        const std::tuple<T...>& _tup) {
-    return tuple_print(os, _tup, std::make_index_sequence<sizeof...(T)>());
+    return nvtuple_ns::tuple_print(os, _tup,
+                                   std::make_index_sequence<sizeof...(T)>());
 }
-
-// namespace named_tuple {
 
 // named_value - value type VT, name type NT - holds the value type in a tuple
 // while knowing the named type as type property
+
+namespace nvtuple_ns {
 
 template<typename VT, typename NT>
 struct named_value {
@@ -54,6 +56,7 @@ struct named_value {
         : _data(std::forward<Args...>(args)...) {}
 
     operator VT&() { return _data; }
+    operator const VT&() const { return _data; }
     VT& get() { return _data; }
     const VT& get() const { return _data; }
 
@@ -181,36 +184,36 @@ class named_tuple : public std::tuple<TS...> {
     }
 };
 
+}  // namespace nvtuple_ns
+
 template<typename... TT, typename... ST>
-auto& operator<<(named_tuple<TT...>& trg, named_tuple<ST...>& src) {
+auto& operator<<(nvtuple_ns::named_tuple<TT...>& trg,
+                 nvtuple_ns::named_tuple<ST...>& src) {
     (..., (trg[typename ST::namedtype{}] = src[typename ST::namedtype{}]));
     return trg;
 }
 
 template<typename... TT, typename... NV>
-auto& operator<<(named_tuple<TT...>& trg, const NV&... src) {
+auto& operator<<(nvtuple_ns::named_tuple<TT...>& trg, const NV&... src) {
     (..., (trg[typename NV::namedtype{}] = src.get()));
     return trg;
 }
 
 template<class CharT, CharT... CS>
 inline constexpr auto operator"" _() {
-    return named_type<CS...>{};
+    return nvtuple_ns::named_type<CS...>{};
 }
-
-//} // namespace named
 
 template<typename VT, typename NT>
 inline std::ostream& operator<<(std::ostream& os,
-                                const named_value<VT, NT>& nv) {
+                                const nvtuple_ns::named_value<VT, NT>& nv) {
     os << nv._typename << ": " << nv.get();
     return os;
 }
 
 template<char... C>
-std::ostream& operator<<(std::ostream& os, const named_type<C...>& nt) {
+std::ostream& operator<<(std::ostream& os,
+                         const nvtuple_ns::named_type<C...>& nt) {
     os << "Namedtype: " << nt._name;
     return os;
 }
-
-#endif  // NAMED_TUPLE_H
