@@ -11,13 +11,14 @@
 
 template<typename... TS>
 class exception_tuple : public std::exception,
-                        public nvtuple_ns::named_tuple<std::decay_t<TS>...> {
+                        public nvtuple_ns::named_tuple<TS...> {
    public:
     std::string mutable _str;
 
     exception_tuple<TS...>(const TS&... vs)
-        : nvtuple_ns::named_tuple<std::decay_t<TS>...>(
-              std::forward<const TS>(vs)...) {}
+        : nvtuple_ns::named_tuple<TS...>(std::forward<const TS>(vs)...) {}
+    exception_tuple<TS...>(TS&&... vs)
+        : nvtuple_ns::named_tuple<TS...>(std::forward<TS>(vs)...) {}
 
     virtual const char* what() const noexcept {
         std::stringstream buff{};

@@ -4,6 +4,7 @@ project(named_tuple)
 include_directories(.)
 
 set(CMAKE_CXX_STANDARD 17)
+set( CMAKE_CXX_FLAGS "-W -Wall -Wshadow -Wpedantic -ggdb3 -O3 " )
 
 add_executable(named_tuple_example    named_tuple_example.cpp named_tuple.h)
 

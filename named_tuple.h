@@ -43,13 +43,13 @@ struct named_value {
     using type = VT;
     using namedtype = typename NT::type;
 
-    named_value(const VT& v) : _data(v) {}
-    named_value(VT&& v) : _data(std::move(v)) {}
-    named_value() = default;
-    named_value(const named_value&) = default;
-    named_value(named_value&&) = default;
-    named_value& operator=(const named_value&) = default;
-    named_value& operator=(named_value&&) = default;
+    constexpr named_value(const VT& v) : _data(v) {}
+    constexpr named_value(VT&& v) : _data(std::move(v)) {}
+    constexpr named_value() = default;
+    constexpr named_value(const named_value&) = default;
+    constexpr named_value(named_value&&) = default;
+    constexpr named_value& operator=(const named_value&) = default;
+    constexpr named_value& operator=(named_value&&) = default;
 
     template<typename... Args>
     explicit named_value(Args... args)
@@ -57,14 +57,14 @@ struct named_value {
 
     operator VT&() { return _data; }
     operator const VT&() const { return _data; }
-    VT& get() { return _data; }
-    const VT& get() const { return _data; }
+    constexpr VT& get() { return _data; }
+    constexpr const VT& get() const { return _data; }
 
-    VT& operator=(const VT& value) {
+    constexpr VT& operator=(const VT& value) {
         _data = value;
         return _data;
     }
-    VT& operator=(VT&& value) {
+    constexpr VT& operator=(VT&& value) {
         _data = std::move(value);
         return _data;
     }
@@ -81,17 +81,17 @@ struct named_type {
     using type = named_type;
 
     template<size_t N>
-    auto operator=(const char (&s)[N]) {
+    constexpr auto operator=(const char (&s)[N]) {
         return named_value<std::string, named_type>{s};
     }
 
     template<typename T>
-    auto operator=(const T& v) const {
+    constexpr auto operator=(const T& v) const {
         return named_value<T, named_type>(v);
     }
 
     template<typename T>
-    auto operator=(T& v) const {
+    constexpr auto operator=(T& v) const {
         return named_value<T, named_type>(std::move(v));
     }
 };
@@ -123,13 +123,21 @@ class named_tuple : public std::tuple<TS...> {
             "named type field, appears more than once in named tuple");
     }
 
-    named_tuple() noexcept : std::tuple<TS...>() {
+    constexpr named_tuple() noexcept : std::tuple<TS...>() {
+        (..., verify_named_type_count<typename TS::namedtype>());
+    }
+    constexpr named_tuple(const named_tuple& t) noexcept = default;
+    constexpr named_tuple(named_tuple&& t) noexcept = default;
+    constexpr named_tuple& operator=(const named_tuple& t) noexcept = default;
+    constexpr named_tuple& operator=(named_tuple&& t) noexcept = default;
+
+    constexpr named_tuple(TS&&... ts) noexcept
+        : std::tuple<TS...>(std::forward<TS>(ts)...) {
         (..., verify_named_type_count<typename TS::namedtype>());
     }
 
-    named_tuple(TS&&... ts) noexcept
-        : std::tuple<TS...>(std::forward<TS>(ts)...) {
-        (..., verify_named_type_count<typename TS::namedtype>());
+    constexpr named_tuple(const TS&... ts) noexcept
+        : std::tuple<TS...>(std::forward<TS>(std::move(ts))...) {
     }
 
     template<typename... CT>
@@ -138,7 +146,7 @@ class named_tuple : public std::tuple<TS...> {
     }
 
     template<typename... CT>
-    named_tuple(const CT&&... cvt) noexcept {
+    named_tuple(const CT&... cvt) noexcept {
         (..., (get<typename CT::namedtype>() = cvt.get()));
     }
 

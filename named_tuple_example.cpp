@@ -171,7 +171,6 @@ int main() {
     example_10();
     example_11();
 
-    auto z1 = "abc"_;
     std::cout << "deep tuple: "
               << std::make_tuple("Hello", 0.1,
                                  std::make_tuple(1, 2, 3, "four", 5.5), 'Z')
@@ -205,8 +204,15 @@ int main() {
 
     auto ttree = nvt::named_tuple{
         ("f1"_ = 123),
-        ("subtup"_ = nvt::named_tuple{("s1"_ = 345), ("s2"_ = 564)}),
+        ("subntup"_ =
+             nvt::named_tuple{("s1"_ = 345),
+                              ("s2"_ = 564)}),  // FIXME: named tuple as field
+        ("subtup"_ = std::make_tuple(("s1"_ = 345),
+                                     ("s2"_ = 564))),  // works just fine :-)
         ("f3"_ = "test me")};
     std::cout << "tree: " << ttree << '\n';
+
+    auto ft = nvt::named_tuple{"x"_ = nvt::named_tuple{("y"_ = 1)}};
+    std::cout << "ft " << ft << '\n';
     return 0;
 }
