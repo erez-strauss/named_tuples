@@ -8,9 +8,14 @@
 #include <iostream>
 #include <tuple>
 
-template<class... T>
-static inline std::ostream& operator<<(std::ostream& os,
-                                       const std::tuple<T...>& _tup);
+namespace nvtuple_ns {
+template<typename VT, typename NT>
+struct named_value;
+}
+
+template<typename VT, typename NT>
+inline std::ostream& operator<<(std::ostream& os,
+                                const nvtuple_ns::named_value<VT, NT>& nv);
 
 namespace nvtuple_ns {  // named value tuple
 
@@ -126,9 +131,9 @@ class named_tuple : public std::tuple<TS...> {
             "named type field, appears more than once in named tuple");
     }
 
-    constexpr named_tuple() noexcept : std::tuple<TS...>() {
-        (..., verify_named_type_count<typename TS::namedtype>());
-    }
+    //    constexpr named_tuple() noexcept : std::tuple<TS...>() {
+    //      (..., verify_named_type_count<typename TS::namedtype>());
+    //  }
 
     constexpr named_tuple(const named_tuple&) = default;
     constexpr named_tuple(named_tuple&&) noexcept = default;
@@ -142,8 +147,8 @@ class named_tuple : public std::tuple<TS...> {
         (..., verify_named_type_count<typename TS::namedtype>());
     }
 
-    constexpr named_tuple(const TS&... ts) noexcept
-        : std::tuple<TS...>(std::forward<TS>(ts)...) {}
+    // constexpr named_tuple(const TS&... ts) noexcept
+    //    : std::tuple<TS...>(std::forward<TS>(ts)...) {}
 
     template<typename... CT>
     named_tuple(named_tuple<CT...>& ct) noexcept {

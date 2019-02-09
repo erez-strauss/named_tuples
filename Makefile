@@ -1,7 +1,7 @@
 
 #CXXFLAGS := -fconcepts -I. -std=c++17 -W -Wall -Wshadow -O3 -ggdb3
 CXXFLAGS := -I. -std=c++17 -W -Wall -Wshadow -O3 -ggdb3
-# CXX := clang++
+#CXX := clang++ -Wno-gnu-string-literal-operator-template
 CXX := g++
 
 all: gtest_nvtuple

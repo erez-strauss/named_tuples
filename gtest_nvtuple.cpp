@@ -138,7 +138,11 @@ std::string funcD(NV&&... v) {
 }
 
 TEST(NamedValueTuple, FuncD_toString) {
-    // EXPECT_EQ(funcD(), "()");  //FIXME:
+    auto empty = nvt::named_tuple<>();
+    std::cerr << "empty1: " << empty << '\n';
+    EXPECT_EQ(funcD(), "()");
+    // EXPECT_EQ(funcD(std::move(empty)), "()");  //FIXME:
+    // EXPECT_EQ(funcD(empty), "()");  //FIXME:
     EXPECT_EQ(funcD("a"_ = 3.1), "(a: 3.1)");
     EXPECT_EQ(funcD(("a"_ = 3), ("x"_ = 3.6), ("z"_ = "abc")),
               "(a: 3, x: 3.6, z: abc)");
