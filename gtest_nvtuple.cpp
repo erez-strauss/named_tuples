@@ -60,3 +60,86 @@ TEST(NamedValueTuple, TupleDeepMove) {
     EXPECT_EQ(stst2.str(),
               "(i: 23, a: a string to be moved, b: (x: another one))");
 }
+
+std::string funcA(const decltype(nvt::named_tuple{
+                      ("x"_ = 1), ("y"_ = 2)}) args = nvt::named_tuple{
+                      ("x"_ = 1), ("y"_ = 2)}) {
+    std::stringstream strm;
+    strm << args;
+    // std::cerr << "funcA: " << args << '\n';
+    return strm.str();
+}
+
+TEST(NamedValueTuple, ArgumentsAsA_Tuple) {
+    EXPECT_EQ(funcA(), "(x: 1, y: 2)");
+    // EXPECT_EQ(funcA(("x"_=5)), "(x: 5, y: 2)"); -- does not work as the
+    // default argument is not being used, see funcB()
+    EXPECT_EQ(funcA(("x"_ = 5)), "(x: 5, y: 0)");
+    EXPECT_EQ(funcA({("y"_ = 10), ("x"_ = 5)}), "(x: 5, y: 10)");
+}
+
+template<typename... NV>
+std::string funcB(const NV... v) {
+    auto ma = nvt::named_tuple{("x"_ = 1), ("y"_ = 2)};
+    (..., (ma << v));
+
+    std::stringstream strm;
+    strm << ma;
+    // std::cerr << "funcB: " << ma << '\n';
+    return strm.str();
+}
+
+TEST(NamedValueTuple, NamedValuesArguments) {
+    EXPECT_EQ(funcB(), "(x: 1, y: 2)");
+    EXPECT_EQ(funcB(("x"_ = 5)), "(x: 5, y: 2)");
+    EXPECT_EQ(funcB(("y"_ = 20), ("x"_ = -10)), "(x: -10, y: 20)");
+    EXPECT_EQ(funcB(("y"_ = 21), ("x"_ = -10)), "(x: -10, y: 21)");
+}
+
+template<typename... NV>
+std::string funcC(NV&&... v) {
+    auto ma =
+        nvt::named_tuple{("x"_ = 1), ("y"_ = 2), ("z"_ = "default string")};
+    (..., (ma << std::move(std::forward<NV>(v))));
+
+    std::stringstream strm;
+    strm << ma;
+    // std::cerr << "funcC: " << ma << '\n';
+    return strm.str();
+}
+
+TEST(NamedValueTuple, NamedValuesArgumentsMove) {
+    EXPECT_EQ(funcC(), "(x: 1, y: 2, z: default string)");
+    EXPECT_EQ(funcC(("x"_ = 5)), "(x: 5, y: 2, z: default string)");
+    EXPECT_EQ(funcC(("y"_ = 20), ("x"_ = -10)),
+              "(x: -10, y: 20, z: default string)");
+    EXPECT_EQ(funcC(("y"_ = 21), ("x"_ = -10)),
+              "(x: -10, y: 21, z: default string)");
+    EXPECT_EQ(funcC(("z"_ = "moved out string")),
+              "(x: 1, y: 2, z: moved out string)");
+
+    auto x1 = ("z"_ = "to be empty");
+    EXPECT_EQ(funcC(x1), "(x: 1, y: 2, z: to be empty)");
+    EXPECT_EQ(funcC(x1), "(x: 1, y: 2, z: )");
+
+    auto x2 = ("z"_ = "to be empty");
+    EXPECT_EQ(funcC(std::move(x2)), "(x: 1, y: 2, z: to be empty)");
+    EXPECT_EQ(funcC(x2), "(x: 1, y: 2, z: )");
+}
+
+template<typename... NV>
+std::string funcD(NV&&... v) {
+    auto ma = nvt::named_tuple<NV...>(std::forward<NV>(std::move(v))...);
+
+    std::stringstream strm;
+    strm << ma;
+    // std::cerr << "funcD: " << ma << '\n';
+    return strm.str();
+}
+
+TEST(NamedValueTuple, FuncD_toString) {
+    // EXPECT_EQ(funcD(), "()");  //FIXME:
+    EXPECT_EQ(funcD("a"_ = 3.1), "(a: 3.1)");
+    EXPECT_EQ(funcD(("a"_ = 3), ("x"_ = 3.6), ("z"_ = "abc")),
+              "(a: 3, x: 3.6, z: abc)");
+}

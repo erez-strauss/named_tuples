@@ -8,6 +8,10 @@
 #include <iostream>
 #include <tuple>
 
+template<class... T>
+static inline std::ostream& operator<<(std::ostream& os,
+                                       const std::tuple<T...>& _tup);
+
 namespace nvtuple_ns {  // named value tuple
 
 template<class TT, size_t... I>
@@ -20,10 +24,6 @@ static inline std::ostream& tuple_print(std::ostream& os, const TT& _tup,
 }
 
 }  // namespace nvtuple_ns
-
-template<class... T>
-static inline std::ostream& operator<<(std::ostream& os,
-                                       const std::tuple<T...>& _tup);
 
 template<class... T>
 static inline std::ostream& operator<<(std::ostream& os,
@@ -129,7 +129,7 @@ class named_tuple : public std::tuple<TS...> {
     constexpr named_tuple() noexcept : std::tuple<TS...>() {
         (..., verify_named_type_count<typename TS::namedtype>());
     }
-  
+
     constexpr named_tuple(const named_tuple&) = default;
     constexpr named_tuple(named_tuple&&) noexcept = default;
 
@@ -143,7 +143,7 @@ class named_tuple : public std::tuple<TS...> {
     }
 
     constexpr named_tuple(const TS&... ts) noexcept
-        : std::tuple<TS...>(std::forward<TS>(std::move(ts))...) {}
+        : std::tuple<TS...>(std::forward<TS>(ts)...) {}
 
     template<typename... CT>
     named_tuple(named_tuple<CT...>& ct) noexcept {
@@ -209,6 +209,12 @@ auto& operator<<(nvtuple_ns::named_tuple<TT...>& trg,
 template<typename... TT, typename... NV>
 auto& operator<<(nvtuple_ns::named_tuple<TT...>& trg, const NV&... src) {
     (..., (trg[typename NV::namedtype{}] = src.get()));
+    return trg;
+}
+
+template<typename... TT, typename... NV>
+auto& operator<<(nvtuple_ns::named_tuple<TT...>& trg, NV&&... mo) {
+    (..., (trg[typename NV::namedtype{}] = std::move(mo)));
     return trg;
 }
 

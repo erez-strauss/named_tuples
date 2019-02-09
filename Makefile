@@ -1,5 +1,8 @@
 
-CXXFLAGS := -I. -std=c++2a -W -Wall -Wshadow -O3 -ggdb3
+#CXXFLAGS := -fconcepts -I. -std=c++17 -W -Wall -Wshadow -O3 -ggdb3
+CXXFLAGS := -I. -std=c++17 -W -Wall -Wshadow -O3 -ggdb3
+# CXX := clang++
+CXX := g++
 
 all: gtest_nvtuple
 	mkdir -p build; cd build ; cmake .. ; make -j VERBOSE=1 && ./named_tuple_example && ./gtest_nvtuple
@@ -9,7 +12,7 @@ reformat:
 
 
 gtest_nvtuple: gtest_nvtuple.cpp named_tuple.h
-	g++ -O3 -ggdb3 -W -Wall -Wshadow -std=c++17 -I . -DGTEST_HAS_PTHREAD=1 -pthread gtest_nvtuple.cpp -l gtest_main -l gtest -o gtest_nvtuple
+	$(CXX) $(CXXFLAGS) -I . -DGTEST_HAS_PTHREAD=1 -pthread gtest_nvtuple.cpp -l gtest_main -l gtest -o gtest_nvtuple
 
 
 clean:
