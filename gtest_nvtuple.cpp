@@ -42,9 +42,9 @@ TEST(NamedValueTuple, TupleDeepMove) {
     // decltype(t1) t2 { std::move(t1) };  // Works fine.
     decltype(t1) t2;
     t2 = std::move(t1);  // also works.
-    // t2["i"_] = std::move (t1["i"_]);  //Does not work yet.
-    // t2["a"_] = std::move (t1["a"_]);  //Does not work yet.
-    // t2["b"_] = std::move (t1["b"_]);  //Does not work yet.
+    // t2["i"_] = std::move (t1["i"_]);  //works fine.
+    // t2["a"_] = std::move (t1["a"_]);  //
+    // t2["b"_] = std::move (t1["b"_]);  //
 
     stst2 << t2;
     // std::cerr << "  copy  t2: " << t2 << '\n';
@@ -54,12 +54,6 @@ TEST(NamedValueTuple, TupleDeepMove) {
     // std::cerr << "  empty t1: " << t1 << '\n';
     // std::cerr << "  stst1et1: " << stst1empty.str() << '\n';
 
-    // decltype(t1)  t2 ( std::move (t) );  //FIXME: does not work yet.
-    // decltype(t1)  t2; t2 = std::move (t); //FIXME: does not work also.
-    // t2["a"_] = std::move (t1["a"_]);  //Does not work yet.
-    // t2["a"_] = t1["a"_];
-    // std::cerr << "\nmoved out t: " << t << '\n';
-    // std::cerr << "\nt2:          " << t2 << '\n';
     EXPECT_EQ(stst1.str(),
               "(i: 23, a: a string to be moved, b: (x: another one))");
     EXPECT_EQ(stst1empty.str(), "(i: 23, a: , b: (x: ))");
