@@ -9,3 +9,6 @@ set( CMAKE_CXX_FLAGS "-W -Wall -Wshadow -Wpedantic -ggdb3 -O3 " )
 add_executable(named_tuple_example    named_tuple_example.cpp named_tuple.h)
 
 add_executable(exception_tuple_example    exception_tuple_example.cpp exception_tuple.h named_tuple.h)
+
+add_executable(gtest_nvtuple    gtest_nvtuple.cpp exception_tuple.h named_tuple.h)
+target_link_libraries(gtest_nvtuple  LINK_PRIVATE pthread gtest_main gtest)

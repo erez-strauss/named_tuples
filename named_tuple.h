@@ -43,11 +43,14 @@ struct named_value {
     using type = VT;
     using namedtype = typename NT::type;
 
+    constexpr named_value() = default;
+
     constexpr named_value(const VT& v) : _data(v) {}
     constexpr named_value(VT&& v) : _data(std::move(v)) {}
-    constexpr named_value() = default;
+
     constexpr named_value(const named_value&) = default;
-    constexpr named_value(named_value&&) = default;
+    constexpr named_value(named_value&&) noexcept = default;
+
     constexpr named_value& operator=(const named_value&) = default;
     constexpr named_value& operator=(named_value&&) = default;
 
@@ -55,7 +58,7 @@ struct named_value {
     explicit named_value(Args... args)
         : _data(std::forward<Args...>(args)...) {}
 
-    operator VT&() { return _data; }
+    operator decltype(auto)() { return _data; }
     operator const VT&() const { return _data; }
     constexpr VT& get() { return _data; }
     constexpr const VT& get() const { return _data; }
@@ -126,10 +129,13 @@ class named_tuple : public std::tuple<TS...> {
     constexpr named_tuple() noexcept : std::tuple<TS...>() {
         (..., verify_named_type_count<typename TS::namedtype>());
     }
-    constexpr named_tuple(const named_tuple& t) noexcept = default;
-    constexpr named_tuple(named_tuple&& t) noexcept = default;
-    constexpr named_tuple& operator=(const named_tuple& t) noexcept = default;
-    constexpr named_tuple& operator=(named_tuple&& t) noexcept = default;
+  
+    constexpr named_tuple(const named_tuple&) = default;
+    constexpr named_tuple(named_tuple&&) noexcept = default;
+
+    constexpr named_tuple& operator=(const named_tuple&) = default;
+    constexpr named_tuple& operator=(named_tuple&) = default;
+    constexpr named_tuple& operator=(named_tuple&&) noexcept = default;
 
     constexpr named_tuple(TS&&... ts) noexcept
         : std::tuple<TS...>(std::forward<TS>(ts)...) {
@@ -137,8 +143,7 @@ class named_tuple : public std::tuple<TS...> {
     }
 
     constexpr named_tuple(const TS&... ts) noexcept
-        : std::tuple<TS...>(std::forward<TS>(std::move(ts))...) {
-    }
+        : std::tuple<TS...>(std::forward<TS>(std::move(ts))...) {}
 
     template<typename... CT>
     named_tuple(named_tuple<CT...>& ct) noexcept {
@@ -170,7 +175,7 @@ class named_tuple : public std::tuple<TS...> {
     }
 
     template<typename T>
-    auto& get() noexcept {
+    decltype(auto) get() noexcept {
         return std::get<(get_index<T>())>(*this);
     }
 
