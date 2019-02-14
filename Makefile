@@ -16,4 +16,4 @@ gtest_nvtuple: gtest_nvtuple.cpp named_tuple.h
 
 
 clean:
-	rm -rf gtest_nvtuple build *~ *.o *.a *.s 
+	rm -rf st gtest_nvtuple build *~ *.o *.a *.s 

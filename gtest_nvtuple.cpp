@@ -9,9 +9,24 @@ namespace nvt = nvtuple_ns;
 
 TEST(NamedValueTuple, SimleTest1) { EXPECT_EQ(true, true); }
 
+TEST(NamedValueTuple, NamedTypes) {
+    std::stringstream stst;
+    stst << "field1"_.str() << '\n';
+    stst << "field1"_;
+    EXPECT_EQ(stst.str(), "field1\nnamed_type: field1");
+}
+
+TEST(NamedValueTuple, NamedValue) {
+    std::stringstream stst;
+    stst << ("field1"_, 1) << '\n';
+    stst << ("field2"_, 1.2) << '\n';
+    stst << ("field3"_, "string value") << '\n';
+    EXPECT_EQ(stst.str(), "field1: 1\nfield2: 1.2\nfield3: \"string value\"\n");
+}
+
 TEST(NamedValueTuple, Tuple) {
     std::stringstream stst;
-    auto t = nvt::named_tuple{("a"_ = 123)};
+    auto t = nvt::named_tuple{("a"_, 123)};
     stst << t;
     // std::cerr << t << stst.str() << '\n';
     EXPECT_EQ(stst.str(), "(a: 123)");
@@ -19,11 +34,11 @@ TEST(NamedValueTuple, Tuple) {
 
 TEST(NamedValueTuple, TupleInA_Tuple) {
     std::stringstream stst;
-    auto t = nvt::named_tuple{("a"_ = 123),
-                              ("b"_ = nvt::named_tuple{("x"_ = "test me")})};
+    auto t = nvt::named_tuple{("a"_, 123),
+                              ("b"_, nvt::named_tuple{("x"_, "test me")})};
     stst << t;
     // std::cerr << t << stst.str() << '\n';
-    EXPECT_EQ(stst.str(), "(a: 123, b: (x: test me))");
+    EXPECT_EQ(stst.str(), "(a: 123, b: (x: \"test me\"))");
 }
 
 TEST(NamedValueTuple, TupleDeepMove) {
@@ -31,9 +46,8 @@ TEST(NamedValueTuple, TupleDeepMove) {
     std::stringstream stst1empty;
     std::stringstream stst2;
 
-    auto t1 =
-        nvt::named_tuple{("i"_ = 23), ("a"_ = "a string to be moved"),
-                         ("b"_ = nvt::named_tuple{("x"_ = "another one")})};
+    auto t1 = nvt::named_tuple{("i"_, 23), ("a"_, "a string to be moved"),
+                               ("b"_, nvt::named_tuple{("x"_, "another one")})};
 
     stst1 << t1;
     // std::cerr << "  start t1: " << t1 << '\n';
@@ -55,15 +69,14 @@ TEST(NamedValueTuple, TupleDeepMove) {
     // std::cerr << "  stst1et1: " << stst1empty.str() << '\n';
 
     EXPECT_EQ(stst1.str(),
-              "(i: 23, a: a string to be moved, b: (x: another one))");
-    EXPECT_EQ(stst1empty.str(), "(i: 23, a: , b: (x: ))");
+              "(i: 23, a: \"a string to be moved\", b: (x: \"another one\"))");
+    EXPECT_EQ(stst1empty.str(), "(i: 23, a: \"\", b: (x: \"\"))");
     EXPECT_EQ(stst2.str(),
-              "(i: 23, a: a string to be moved, b: (x: another one))");
+              "(i: 23, a: \"a string to be moved\", b: (x: \"another one\"))");
 }
 
-std::string funcA(const decltype(nvt::named_tuple{
-                      ("x"_ = 1), ("y"_ = 2)}) args = nvt::named_tuple{
-                      ("x"_ = 1), ("y"_ = 2)}) {
+std::string funcA(const decltype(nvt::named_tuple{("x"_, 1), ("y"_, 2)}) args =
+                      nvt::named_tuple{("x"_, 1), ("y"_, 2)}) {
     std::stringstream strm;
     strm << args;
     // std::cerr << "funcA: " << args << '\n';
@@ -74,13 +87,13 @@ TEST(NamedValueTuple, ArgumentsAsA_Tuple) {
     EXPECT_EQ(funcA(), "(x: 1, y: 2)");
     // EXPECT_EQ(funcA(("x"_=5)), "(x: 5, y: 2)"); -- does not work as the
     // default argument is not being used, see funcB()
-    EXPECT_EQ(funcA(("x"_ = 5)), "(x: 5, y: 0)");
-    EXPECT_EQ(funcA({("y"_ = 10), ("x"_ = 5)}), "(x: 5, y: 10)");
+    EXPECT_EQ(funcA(("x"_, 5)), "(x: 5, y: 0)");
+    EXPECT_EQ(funcA({("y"_, 10), ("x"_, 5)}), "(x: 5, y: 10)");
 }
 
 template<typename... NV>
 std::string funcB(const NV... v) {
-    auto ma = nvt::named_tuple{("x"_ = 1), ("y"_ = 2)};
+    auto ma = nvt::named_tuple{("x"_, 1), ("y"_, 2)};
     (..., (ma << v));
 
     std::stringstream strm;
@@ -91,15 +104,14 @@ std::string funcB(const NV... v) {
 
 TEST(NamedValueTuple, NamedValuesArguments) {
     EXPECT_EQ(funcB(), "(x: 1, y: 2)");
-    EXPECT_EQ(funcB(("x"_ = 5)), "(x: 5, y: 2)");
-    EXPECT_EQ(funcB(("y"_ = 20), ("x"_ = -10)), "(x: -10, y: 20)");
-    EXPECT_EQ(funcB(("y"_ = 21), ("x"_ = -10)), "(x: -10, y: 21)");
+    EXPECT_EQ(funcB(("x"_, 5)), "(x: 5, y: 2)");
+    EXPECT_EQ(funcB(("y"_, 20), ("x"_, -10)), "(x: -10, y: 20)");
+    EXPECT_EQ(funcB(("y"_, 21), ("x"_, -10)), "(x: -10, y: 21)");
 }
 
 template<typename... NV>
 std::string funcC(NV&&... v) {
-    auto ma =
-        nvt::named_tuple{("x"_ = 1), ("y"_ = 2), ("z"_ = "default string")};
+    auto ma = nvt::named_tuple{("x"_, 1), ("y"_, 2), ("z"_, "default string")};
     (..., (ma << std::move(std::forward<NV>(v))));
 
     std::stringstream strm;
@@ -109,22 +121,22 @@ std::string funcC(NV&&... v) {
 }
 
 TEST(NamedValueTuple, NamedValuesArgumentsMove) {
-    EXPECT_EQ(funcC(), "(x: 1, y: 2, z: default string)");
-    EXPECT_EQ(funcC(("x"_ = 5)), "(x: 5, y: 2, z: default string)");
-    EXPECT_EQ(funcC(("y"_ = 20), ("x"_ = -10)),
-              "(x: -10, y: 20, z: default string)");
-    EXPECT_EQ(funcC(("y"_ = 21), ("x"_ = -10)),
-              "(x: -10, y: 21, z: default string)");
-    EXPECT_EQ(funcC(("z"_ = "moved out string")),
-              "(x: 1, y: 2, z: moved out string)");
+    EXPECT_EQ(funcC(), "(x: 1, y: 2, z: \"default string\")");
+    EXPECT_EQ(funcC(("x"_, 5)), "(x: 5, y: 2, z: \"default string\")");
+    EXPECT_EQ(funcC(("y"_, 20), ("x"_, -10)),
+              "(x: -10, y: 20, z: \"default string\")");
+    EXPECT_EQ(funcC(("y"_, 21), ("x"_, -10)),
+              "(x: -10, y: 21, z: \"default string\")");
+    EXPECT_EQ(funcC(("z"_, "moved out string")),
+              "(x: 1, y: 2, z: \"moved out string\")");
 
-    auto x1 = ("z"_ = "to be empty");
-    EXPECT_EQ(funcC(x1), "(x: 1, y: 2, z: to be empty)");
-    EXPECT_EQ(funcC(x1), "(x: 1, y: 2, z: )");
+    auto x1 = ("z"_, "to be empty");
+    EXPECT_EQ(funcC(x1), "(x: 1, y: 2, z: \"to be empty\")");
+    EXPECT_EQ(funcC(x1), "(x: 1, y: 2, z: \"\")");
 
-    auto x2 = ("z"_ = "to be empty");
-    EXPECT_EQ(funcC(std::move(x2)), "(x: 1, y: 2, z: to be empty)");
-    EXPECT_EQ(funcC(x2), "(x: 1, y: 2, z: )");
+    auto x2 = ("z"_, "to be empty");
+    EXPECT_EQ(funcC(std::move(x2)), "(x: 1, y: 2, z: \"to be empty\")");
+    EXPECT_EQ(funcC(x2), "(x: 1, y: 2, z: \"\")");
 }
 
 template<typename... NV>
@@ -143,7 +155,7 @@ TEST(NamedValueTuple, FuncD_toString) {
     EXPECT_EQ(funcD(), "()");
     // EXPECT_EQ(funcD(std::move(empty)), "()");  //FIXME:
     // EXPECT_EQ(funcD(empty), "()");  //FIXME:
-    EXPECT_EQ(funcD("a"_ = 3.1), "(a: 3.1)");
-    EXPECT_EQ(funcD(("a"_ = 3), ("x"_ = 3.6), ("z"_ = "abc")),
-              "(a: 3, x: 3.6, z: abc)");
+    // EXPECT_EQ(funcD("a"_ , 3.1), "(a: 3.1)");
+    EXPECT_EQ(funcD(("a"_, 3), ("x"_, 3.6), ("z"_, "abc")),
+              "(a: 3, x: 3.6, z: \"abc\")");
 }

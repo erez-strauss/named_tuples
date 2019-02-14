@@ -28,7 +28,6 @@ class exception_tuple : public std::exception,
     }
 };
 
-#define NT_EXCEPTION(...)                                          \
-    exception_tuple(("file"_ = __FILE__), ("line"_ = __LINE__),    \
-                    ("func"_ = __PRETTY_FUNCTION__) __VA_OPT__(, ) \
-                        __VA_ARGS__)
+#define NT_EXCEPTION(...)                                     \
+    exception_tuple(("file"_, __FILE__), ("line"_, __LINE__), \
+                    ("func"_, __PRETTY_FUNCTION__)__VA_OPT__(, ) __VA_ARGS__)
