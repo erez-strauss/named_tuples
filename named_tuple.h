@@ -11,7 +11,7 @@
 
 namespace nvtuple_ns {
 template<typename VT, typename NT>
-struct named_value;
+class named_value;
 }
 
 // named_value - value type VT, name type NT - holds the value type in a tuple
@@ -20,13 +20,15 @@ struct named_value;
 namespace nvtuple_ns {
 
 template<typename FN>  // decltype("abc"_)
-struct named_value_type {
+class named_value_type {
+   public:
     constexpr const static bool value{false};
     using type = void;
 };
 
 template<typename VT, typename NT>
-struct named_value {
+class named_value {
+   public:
     static inline const char* _typename{NT::_name};
     using type = VT;
     using namedtype = typename NT::type;
@@ -47,7 +49,8 @@ struct named_value {
         : _data(std::forward<Args...>(args)...) {}
 
     operator decltype(auto)() { return _data; }
-    operator const VT&() const { return _data; }
+    operator decltype(auto)() const { return _data; }
+    // operator const VT&() const { return _data; }
     constexpr VT& get() { return _data; }
     constexpr const VT& get() const { return _data; }
 
@@ -67,14 +70,22 @@ struct named_value {
 // named type - creates a type for a given string, field a tuple member.
 
 template<char... C>
-struct named_type {
+class named_type {
+   public:
     static constexpr const inline char _name[sizeof...(C) + 1]{C..., '\0'};
     static constexpr const inline std::string_view _name_sv{_name,
                                                             sizeof...(C)};
+    static constexpr inline bool isANamedType() { return true; }
     using type = named_type;
 
     constexpr auto str() const { return _name_sv; }
 };
+
+template<char... Ca, char... Cb>
+constexpr decltype(auto) operator+(const named_type<Ca...>&,
+                                   const named_type<Cb...>&) {
+    return named_type<Ca..., Cb...>{};
+}
 
 // named tuple - hold named values, inherits from std::tuple
 //  TS the named value types
@@ -180,28 +191,28 @@ class named_tuple : public std::tuple<TS...> {
 template<typename... TS>
 using tuple = named_tuple<TS...>;
 
-template<size_t N, char... C,
-         typename RT = typename std::conditional<
-             nvtuple_ns::named_value_type<
-                 const nvtuple_ns::named_type<C...> >::value,
-             typename nvtuple_ns::named_value_type<
-                 const nvtuple_ns::named_type<C...> >::type,
-             std::string>::type>
+template<
+    size_t N, char... C,
+    typename RT = typename std::conditional<
+        nvtuple_ns::named_value_type<const nvtuple_ns::named_type<C...>>::value,
+        typename nvtuple_ns::named_value_type<
+            const nvtuple_ns::named_type<C...>>::type,
+        std::string>::type>
 constexpr decltype(auto) operator,(const nvtuple_ns::named_type<C...> fn,
                                    const char (&s)[N]) {
-    return nvtuple_ns::named_value<RT, decltype(fn)>{s};
+    return nvtuple_ns::named_value<RT, const decltype(fn)>{s};
 }
 
-template<typename T, char... C,
-         typename RT = typename std::conditional<
-             nvtuple_ns::named_value_type<
-                 const nvtuple_ns::named_type<C...> >::value,
-             typename nvtuple_ns::named_value_type<
-                 const nvtuple_ns::named_type<C...> >::type,
-             T>::type>
+template<
+    typename T, char... C,
+    typename RT = typename std::conditional<
+        nvtuple_ns::named_value_type<const nvtuple_ns::named_type<C...>>::value,
+        typename nvtuple_ns::named_value_type<
+            const nvtuple_ns::named_type<C...>>::type,
+        T>::type>
 constexpr decltype(auto) operator,(const nvtuple_ns::named_type<C...> fn,
                                    const T& v) {
-    return nvtuple_ns::named_value<RT, decltype(fn)>{v};
+    return nvtuple_ns::named_value<RT, const decltype(fn)>{v};
 }
 
 }  // namespace nvtuple_ns
@@ -296,15 +307,39 @@ static inline std::ostream& tuple_print(std::ostream& os, const TT& tup,
     return os;
 }
 
-} // namespace nvtuple_ns
+}  // namespace nvtuple_ns
 
+// typename std::enable_if<NV::value, typename NV::nvalue_type>::type
+
+template<
+    typename NV,
+    typename RT = typename std::enable_if<
+        NV::isANamedType(),
+        typename nvtuple_ns::named_value<
+            typename nvtuple_ns::named_value_type<NV>::type, const NV>>::type>
+typename std::enable_if<
+    NV::isANamedType(),
+    typename nvtuple_ns::named_value<
+        typename nvtuple_ns::named_value_type<NV>::type, const NV>>::type
+operator~(NV&&) {
+    return RT{};
+    // return typename nvtuple_ns::named_value<typename
+    // nvtuple_ns::named_value_type<NV>::type, const NV>{};
+}
 
 #define NVT_FIELD_TYPE(F, T)                                           \
     namespace nvtuple_ns {                                             \
     template<>                                                         \
+    struct named_value_type<decltype(F)> {                             \
+        constexpr const inline static bool value{true};                \
+        using named_type = const decltype(F);                          \
+        using type = T;                                                \
+        using nvalue_type = nvtuple_ns::named_value<type, named_type>; \
+    };                                                                 \
+    template<>                                                         \
     struct named_value_type<const decltype(F)> {                       \
         constexpr const inline static bool value{true};                \
-        using named_type = decltype(F);                                \
+        using named_type = const decltype(F);                          \
         using type = T;                                                \
         using nvalue_type = nvtuple_ns::named_value<type, named_type>; \
     };                                                                 \
