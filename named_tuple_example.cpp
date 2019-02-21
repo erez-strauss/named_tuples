@@ -24,8 +24,8 @@ void example_2() {
     std::cout << "  changed fieldA: " << t2 << '\n';
 
     auto pfoo = [](auto x) {
-        std::cout << "    name: '" << x._typename << "' value: " << x.get()
-                  << '\n';
+        std::cout << "    name: '" << x.get_value_name()
+                  << "' value: " << x.get() << '\n';
     };
     t2.foreach (pfoo);
 }
@@ -67,7 +67,7 @@ template<>
 inline std::ostream& operator<<(
     std::ostream& os,
     const nvt::named_value<std::string, decltype("address"_)>& nv) {
-    os << nv._typename << ": '" << nv.get() << "'";
+    os << nv.get_value_name() << ": '" << nv.get() << "'";
     return os;
 }
 

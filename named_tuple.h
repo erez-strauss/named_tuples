@@ -29,7 +29,7 @@ class named_value_type {
 template<typename VT, typename NT>
 class named_value {
    public:
-    static inline const char* _typename{NT::_name};
+    static constexpr inline const char* get_value_name() { return NT::_name; }
     using type = VT;
     using namedtype = typename NT::type;
     constexpr static inline bool isANV() { return true; }
@@ -266,7 +266,7 @@ inline typename std::enable_if<std::is_same<VT, std::string>::value,
                                std::ostream&>::type
 operator<<(std::ostream& os,
            const typename nvtuple_ns::named_value<VT, NT>& nv) {
-    os << nv._typename << ": \"" << nv.get() << '"';
+    os << nv.get_value_name() << ": \"" << nv.get() << '"';
     return os;
 }
 
@@ -275,7 +275,7 @@ inline typename std::enable_if<!std::is_same<VT, std::string>::value,
                                std::ostream&>::type
 operator<<(std::ostream& os,
            const typename nvtuple_ns::named_value<VT, NT>& nv) {
-    os << nv._typename << ": " << nv.get();
+    os << nv.get_value_name() << ": " << nv.get();
     return os;
 }
 
