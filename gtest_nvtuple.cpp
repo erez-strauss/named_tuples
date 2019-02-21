@@ -26,7 +26,7 @@ TEST(NamedValueTuple, NamedValue) {
         (std::is_same<
             decltype(("z"_, 1.2)),
             nvtuple_ns::named_value<double, const decltype("z"_)> >::value));
-    auto z2 = ("age"_, 14);
+    // auto z2 = ("age"_, 14);
     EXPECT_TRUE(
         (std::is_same<
             decltype(("age"_, 1)),
@@ -42,18 +42,25 @@ TEST(NamedValueTuple, NamedValue) {
         (std::is_same<decltype(("g"_, "test string value")),
                       nvtuple_ns::named_value<std::string,
                                               const decltype("g"_)> >::value));
-    auto z = ~"age"_;
+    // auto z = ~"age"_;
     EXPECT_TRUE(
         (std::is_same<
             decltype((~"age"_)),
             nvtuple_ns::named_value<float, const decltype("age"_)> >::value));
 
-    auto d1 = ("f"_, 2);
-    std::cerr << "d1: " << d1 << '\n';
     //    EXPECT_TRUE(
     //    (std::is_same<
     //        decltype(d1),
     //    nvtuple_ns::named_value<int, const decltype("f"_)> >::value));
+}
+
+TEST(NamedValueTuple, NamedValue2) {
+    std::stringstream stst;
+    auto d1 = ("f"_, 2);
+    stst << d1;
+    EXPECT_EQ(stst.str(), "f: 2");
+
+    EXPECT_TRUE((std::is_same<decltype("a"_ + "b"_), decltype("ab"_)>::value));
 }
 
 TEST(NamedValueTuple, Tuple) {
@@ -200,7 +207,7 @@ inline typename std::enable_if<(sizeof...(NV) > 0), std::string>::type funcD(
 }
 
 TEST(NamedValueTuple, FuncD_toString) {
-    auto empty = nvt::named_tuple<>();
+    // auto empty = nvt::named_tuple<>();
     // std::cerr << "empty1: " << empty << '\n';
     // EXPECT_EQ(funcD(), "()");
     // EXPECT_EQ(funcD(std::move(empty)), "()");
