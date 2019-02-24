@@ -32,7 +32,7 @@ class named_value {
     static constexpr inline const char* get_value_name() { return NT::_name; }
     using type = VT;
     using namedtype = typename NT::type;
-    constexpr static inline bool isANV() { return true; }
+    constexpr static inline bool is_a_named_value() { return true; }
     constexpr named_value() = default;
 
     constexpr named_value(const VT& v) : _data(v) {}
@@ -75,7 +75,7 @@ class named_type {
     static constexpr const inline char _name[sizeof...(C) + 1]{C..., '\0'};
     static constexpr const inline std::string_view _name_sv{_name,
                                                             sizeof...(C)};
-    static constexpr inline bool isANamedType() { return true; }
+    static constexpr inline bool is_a_named_type() { return true; }
     using type = named_type;
 
     constexpr auto str() const { return _name_sv; }
@@ -239,7 +239,7 @@ auto& operator<<(nvtuple_ns::named_tuple<TT...>& trg, const NV&... src) {
 }
 
 template<typename... TT, typename NV>
-typename std::enable_if<NV::isANV(), nvtuple_ns::named_tuple<TT...>&>::type
+typename std::enable_if<NV::is_a_named_value(), nvtuple_ns::named_tuple<TT...>&>::type
 operator<<(nvtuple_ns::named_tuple<TT...>& trg, NV&& mo) {
     trg[typename NV::namedtype{}] = std::move(mo);
     return trg;
@@ -314,17 +314,11 @@ static inline std::ostream& tuple_print(std::ostream& os, const TT& tup,
 template<
     typename NV,
     typename RT = typename std::enable_if<
-        NV::isANamedType(),
+        NV::is_a_named_type(),
         typename nvtuple_ns::named_value<
             typename nvtuple_ns::named_value_type<NV>::type, const NV>>::type>
-typename std::enable_if<
-    NV::isANamedType(),
-    typename nvtuple_ns::named_value<
-        typename nvtuple_ns::named_value_type<NV>::type, const NV>>::type
-operator~(NV&&) {
-    return RT{};
-    // return typename nvtuple_ns::named_value<typename
-    // nvtuple_ns::named_value_type<NV>::type, const NV>{};
+RT operator~(NV&&) {
+    return {};
 }
 
 #define NVT_FIELD_TYPE(F, T)                                           \
