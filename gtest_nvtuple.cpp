@@ -12,6 +12,9 @@ TEST(NamedValueTuple, NamedTypes) {
     stst << "field1"_.str() << '\n';
     stst << "field1"_;
     EXPECT_EQ(stst.str(), "field1\nnamed_type: field1");
+
+    EXPECT_TRUE((std::is_same<decltype("abc"_),
+                              nvtuple_ns::named_type<'a', 'b', 'c'> >::value));
 }
 
 NVT_FIELD_TYPE("age"_, float)
@@ -76,8 +79,15 @@ TEST(NamedValueTuple, TupleInA_Tuple) {
     auto t = nvt::named_tuple{("a"_, 123),
                               ("b"_, nvt::named_tuple{("x"_, "test me")})};
     stst << t;
-    // std::cerr << t << stst.str() << '\n';
     EXPECT_EQ(stst.str(), "(a: 123, b: (x: \"test me\"))");
+}
+
+TEST(NamedValueTuple, ValuesNames) {
+    auto t = nvt::named_tuple{("a"_, 1), ("b"_, 2.0), ("c"_, "the world")};
+
+    EXPECT_TRUE(std::string("a") == t.names()[0] &&
+                std::string("b") == t.names()[1] &&
+                std::string("c") == t.names()[2]);
 }
 
 TEST(NamedValueTuple, TupleDeepMove) {

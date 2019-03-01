@@ -4,15 +4,42 @@
 // Author: Erez Strauss <erez@erezstrauss.com>
 
 #include <named_tuple.h>
+#include <array>
 #include <iostream>
+#include <sstream>
 
 namespace nvt = nvtuple_ns;
+
+#define EXAMPLE(NAME, CODE)                                                \
+    do {                                                                   \
+        const std::string xname = NAME;                                    \
+        std::string codestring = #CODE;                                    \
+        codestring = codestring.substr(7);                                 \
+        codestring.resize(codestring.size() - 4);                          \
+        std::stringstream outstring;                                       \
+        CODE;                                                              \
+        std::cout << xname << (xname.empty() ? "" : "\n") << "=== code:\n" \
+                  << codestring << "\n=== output:\n"                       \
+                  << outstring.str() << "\n===\n";                         \
+    } while (0)
 
 // Example 1 shows named tuple creation and printing
 void example_1() {
     auto t1 =
         std::make_tuple(("fieldA"_, 123), ("B"_, 100.111), ("lastone"_, 999));
     std::cout << "example 1:\n  " << t1 << '\n';
+    EXAMPLE(
+        "First one", ([&]() {
+            outstring << nvt::named_tuple{("first"_, 12), ("second"_, 4.99)};
+        }()));
+    EXAMPLE(
+        "Multi line", ([&]() {
+            outstring << nvt::named_tuple{("first"_, 12), ("second"_, 4.99)};
+        }()));
+    EXAMPLE("fields names", ([&]() {
+                auto x = nvt::named_tuple{("first"_, 12), ("second"_, 4.99)};
+                for (auto& nm : x.names()) outstring << "'" << nm << "'\n";
+            }()));
 }
 
 // Example 2 shows named_tuple and field modification using operator[]

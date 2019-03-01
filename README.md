@@ -9,13 +9,13 @@ The need for simple on the fly creation of named tuple without
 
 With named value tuples one can do better, for example, create named fields pair:
 
-```
+```cpp
  auto t = std::make_tuple ( ("addr"_, p), ("size"_, n) );
  return t;
 ```
  and the caller of this function will get a tuple with pointer and size, with their names
  access to fields is using [] operator:  for example:
-```c++ 
+```cpp 
  p = t[ "adrr"_ ];
 ``` 
  or setting using t["addr"\_ ] = p;
