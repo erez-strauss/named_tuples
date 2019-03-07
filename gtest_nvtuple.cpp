@@ -124,6 +124,31 @@ TEST(NamedValueTuple, TupleDeepMove) {
               "(i: 23, a: \"a string to be moved\", b: (x: \"another one\"))");
 }
 
+NVT_FIELD_TYPE("name"_, std::string)
+NVT_FIELD_TYPE("uid"_, uint64_t)
+
+NVT_FIELD_TYPE("pid"_, pid_t)
+NVT_FIELD_TYPE("dbl"_, double)
+
+using person_t =
+    decltype(nvt::named_tuple(~"name"_, ~"uid"_, ~"age"_, ("xyz"_, 3.6)));
+
+TEST(NamedValueTuple, DefaultTypes) {
+    std::stringstream strm;
+
+    auto t1 = nvt::named_tuple{("dbl"_, 3)};
+    strm << std::fixed << std::setprecision(3);
+    strm << t1;
+    EXPECT_EQ(strm.str(), "(dbl: 3.000)");
+
+    person_t pr1;
+    pr1["name"_] = "John D.";
+    strm.str("");
+    strm << pr1;
+    EXPECT_EQ(strm.str(),
+              "(name: \"John D.\", uid: 0, age: 0.000, xyz: 0.000)");
+}
+
 std::string funcA(const decltype(nvt::named_tuple{("x"_, 1), ("y"_, 2)}) args =
                       nvt::named_tuple{("x"_, 1), ("y"_, 2)}) {
     std::stringstream strm;
