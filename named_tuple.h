@@ -222,14 +222,14 @@ constexpr decltype(auto) operator,(const nvtuple_ns::named_type<C...> fn,
 }  // namespace nvtuple_ns
 
 template<typename... TT, typename... ST>
-auto& operator<<(nvtuple_ns::named_tuple<TT...>& trg,
+inline auto& operator<<(nvtuple_ns::named_tuple<TT...>& trg,
                  const nvtuple_ns::named_tuple<ST...>& src) {
     (..., (trg[typename ST::namedtype{}] = src[typename ST::namedtype{}]));
     return trg;
 }
 
 template<typename... TT, typename... ST>
-auto& operator<<(nvtuple_ns::named_tuple<TT...>& trg,
+inline auto& operator<<(nvtuple_ns::named_tuple<TT...>& trg,
                  nvtuple_ns::named_tuple<ST...>&& src) {
     (..., (trg[typename ST::namedtype{}] =
                std::move(src[typename ST::namedtype{}])));
@@ -237,13 +237,13 @@ auto& operator<<(nvtuple_ns::named_tuple<TT...>& trg,
 }
 
 template<typename... TT, typename... NV>
-auto& operator<<(nvtuple_ns::named_tuple<TT...>& trg, const NV&... src) {
+inline auto& operator<<(nvtuple_ns::named_tuple<TT...>& trg, const NV&... src) {
     (..., (trg[typename NV::namedtype{}] = src.get()));
     return trg;
 }
 
 template<typename... TT, typename NV>
-typename std::enable_if<NV::is_a_named_value(),
+inline typename std::enable_if<NV::is_a_named_value(),
                         nvtuple_ns::named_tuple<TT...>&>::type
 operator<<(nvtuple_ns::named_tuple<TT...>& trg, NV&& mo) {
     trg[typename NV::namedtype{}] = std::move(mo);
@@ -256,14 +256,14 @@ inline constexpr auto operator"" _() {
 }
 
 template<char... C>
-std::ostream& operator<<(std::ostream& os,
+inline std::ostream& operator<<(std::ostream& os,
                          const nvtuple_ns::named_type<C...>& nt) {
     os << "named_type: " << nt.str();
     return os;
 }
 
 template<class... T>
-static inline std::ostream& operator<<(std::ostream& os,
+inline std::ostream& operator<<(std::ostream& os,
                                        const std::tuple<T...>& tup);
 
 template<typename NT, typename VT>
@@ -286,16 +286,16 @@ operator<<(std::ostream& os,
 
 namespace nvtuple_ns {
 template<class TT, size_t... I>
-static inline std::ostream& tuple_print(std::ostream& os, const TT& tup,
+inline std::ostream& tuple_print(std::ostream& os, const TT& tup,
                                         std::index_sequence<I...>);
 }
 
 template<class... T>
-static inline std::ostream& operator<<(std::ostream& os,
+inline std::ostream& operator<<(std::ostream& os,
                                        const std::tuple<T...>& tup);
 
 template<class... T>
-static inline std::ostream& operator<<(std::ostream& os,
+inline std::ostream& operator<<(std::ostream& os,
                                        const std::tuple<T...>& tup) {
     return nvtuple_ns::tuple_print(os, tup,
                                    std::make_index_sequence<sizeof...(T)>());
@@ -304,7 +304,7 @@ static inline std::ostream& operator<<(std::ostream& os,
 namespace nvtuple_ns {
 
 template<class TT, size_t... I>
-static inline std::ostream& tuple_print(std::ostream& os, const TT& tup,
+inline std::ostream& tuple_print(std::ostream& os, const TT& tup,
                                         std::index_sequence<I...>) {
     os << "(";
     (..., ((os << (I == 0 ? "" : ", ")) << (std::get<I>(tup))));
