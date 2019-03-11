@@ -22,7 +22,7 @@ class exception_tuple : public std::exception,
 
     virtual const char* what() const noexcept {
         std::stringstream buff{};
-        (..., (buff << ", " << std::get<TS>(*this)));
+        buff << *static_cast<const nvtuple_ns::named_tuple<TS...>*>(this);
         _str = buff.str();
         return _str.c_str();
     }

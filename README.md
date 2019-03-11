@@ -77,6 +77,7 @@ To simplify the usage of the named tuple, the << operator was defined for named 
  
 # examples:
 
+```cpp
     auto t1 = std::make_tuple(("fieldA"_ = 123), ("B"_ = 100.111), ("lastone"_ = 999));
     std::cout << "example 1:\n  " << t1 << '\n';
 example 1:
@@ -108,6 +109,7 @@ fieldX: 123
 fieldX: 123
 fieldY: test me
 
+```
 
 ## next tasks:
 
